@@ -58,11 +58,6 @@ public class Weapon : MonoBehaviour
         return closest;
     }
 
-    private void OnLevelUp()
-    {
-        cooldown = Mathf.Max(0.1f, cooldown * 0.9f);
-    }
-
     public void ModifyCooldown(float amount)
     {
         cooldown = Mathf.Max(0.1f, cooldown - amount);

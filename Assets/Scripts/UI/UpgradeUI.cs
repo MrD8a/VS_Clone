@@ -50,7 +50,7 @@ public class UpgradeUI : MonoBehaviour
                 weapon.ModifyCooldown(upgrade.value);
                 break;
             case UpgradeType.WeaponDamage:
-                weapon.ModifyDamage((int)upgrade.value);
+                weapon.ModifyDamage(Mathf.RoundToInt(upgrade.value));
                 break;
             case UpgradeType.MoveSpeed:
                 player.ModifyMoveSpeed(upgrade.value);

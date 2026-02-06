@@ -15,4 +15,4 @@ MonoBehaviour:
   upgradeName: Damage Increase
   description: 
   type: 1
-  value: 0.5
+  value: 1

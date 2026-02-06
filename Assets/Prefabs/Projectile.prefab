@@ -128,8 +128,8 @@ CircleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.014919952, y: 0}
-  m_Radius: 0.069186255
+  m_Offset: {x: 0.09016374, y: -0.051912546}
+  m_Radius: 0.34207633
 --- !u!50 &1032080369812374599
 Rigidbody2D:
   serializedVersion: 5
@@ -172,3 +172,4 @@ MonoBehaviour:
   speed: 10
   damage: 1
   lifetime: 3
+  pool: {fileID: 0}

@@ -22,16 +22,7 @@ public class PlayerExperience : MonoBehaviour
         currentXP -= xpToNextLevel;
         xpToNextLevel = Mathf.RoundToInt(xpToNextLevel * 1.5f);
 
-        ApplyLevelUpBonus();
-
         Time.timeScale = 0f;
         UpgradeUI.Instance.Show();
-    }
-
-
-    private void ApplyLevelUpBonus()
-    {
-        Weapon weapon = GetComponent<Weapon>();
-        weapon.SendMessage("OnLevelUp", SendMessageOptions.DontRequireReceiver);
     }
 }
