@@ -22,8 +22,9 @@ public class PlayerExperience : MonoBehaviour
         currentXP -= xpToNextLevel;
         xpToNextLevel = Mathf.RoundToInt(xpToNextLevel * 1.5f);
 
-        Time.timeScale = 0f;
+        ApplyLevelUpBonus();
 
+        Time.timeScale = 0f;
         UpgradeUI.Instance.Show();
     }
 

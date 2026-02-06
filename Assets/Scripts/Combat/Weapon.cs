@@ -8,6 +8,12 @@ public class Weapon : MonoBehaviour
     [SerializeField] private float range = 10f;
 
     private float timer;
+    private int currentDamage;
+
+    private void Awake()
+    {
+        currentDamage = projectilePrefab.Damage;
+    }
 
     private void Update()
     {
@@ -29,8 +35,8 @@ public class Weapon : MonoBehaviour
 
         Projectile proj = projectilePool.Get();
         proj.transform.position = transform.position;
-        proj.Initialize(direction);
-        proj.pool = projectilePool; // assign pool reference
+        proj.pool = projectilePool;
+        proj.Initialize(direction, currentDamage);
     }
 
     private EnemyHealth FindNearestEnemy()
@@ -64,7 +70,7 @@ public class Weapon : MonoBehaviour
 
     public void ModifyDamage(int amount)
     {
-        projectilePrefab.SetDamage(projectilePrefab.Damage + amount);
+        currentDamage += amount;
     }
 
 }
