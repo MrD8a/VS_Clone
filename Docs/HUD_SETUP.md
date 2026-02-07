@@ -57,32 +57,49 @@ The bar sits under the player in world space and is only visible when the player
 
 ## 2. XP bar and timer (on the main Canvas)
 
-1. **HUD container**
-   - Select the **Canvas** (the one used for Upgrade / Game Over).
-   - Right‑click Canvas → **Create Empty**. Rename to **HUD**.
-   - Set **Rect Transform**: Anchor **Top Stretch** (top‑center), **Top** = 0, **Height** e.g. **80**, **Left/Right** = 0.
+These sit at the top of the screen on your main Canvas (the one used for Upgrade / Game Over).
 
-2. **XP bar**
-   - Right‑click **HUD** → **UI** → **Image**. Rename to **XPBarBg**.
-   - Anchor **Top Stretch**, **Top** = 0, **Height** e.g. **12**, **Left** = 10, **Right** = 10.
-   - Set **Color** to a dark colour (e.g. dark grey).
-   - Right‑click **XPBarBg** → **UI** → **Image**. Rename to **XPBarFill**.
-   - Stretch to fill XPBarBg (anchor min 0,0 max 1,1, offsets 0).
-   - Set **Color** to blue (or your choice).
-   - **Image Type** = **Filled**, **Fill Method** = **Horizontal**, **Fill Origin** = **Left**, **Fill Amount** = 0 (script will update it).
-   - Ensure this Image has a **Sprite** assigned (e.g. UISprite or any sprite).
+### Step 1 – Create the HUD container
 
-3. **Timer**
-   - Right‑click **HUD** → **UI** → **Text - TextMeshPro** (or **Text (Legacy)** if you prefer). Rename to **Timer**.
-   - Anchor **Top Center**, **Pos Y** e.g. **-28**, **Width** 200, **Height** 30.
-   - Set text to **00:00**, font size e.g. **24**, alignment **Center**.
-   - If using TMP, ensure the **Font Asset** is assigned (e.g. LiberationSans SDF).
+1. In the **Hierarchy**, select the **Canvas** (the one with Upgrade UI / Game Over UI).
+2. Right‑click the Canvas → **Create Empty**. Rename the new object to **HUD**.
+3. Select **HUD**. In the **Inspector**, **Rect Transform**:
+   - Click the **Anchor** square. Choose **top‑stretch** (top row, middle: anchor at top, stretches horizontally). Or set **Min** (0, 1), **Max** (1, 1).
+   - **Pos X** = 0, **Pos Y** = 0, **Pos Z** = 0.
+   - **Left** = 0, **Right** = 0, **Top** = 0, **Bottom** = **-80** (so **Height** is 80). Or set **Height** = 80 and **Top** = 0.
 
-4. **Wire up the script**
-   - Select the **Canvas** (or the object that has **Game HUD**).
-   - Add **Game HUD** if not already there.
-   - Assign **Xp Bar Fill** → the **XPBarFill** Image (the child of XPBarBg).
-   - Assign **Timer Text** → the **Timer** text component.
+### Step 2 – Add the XP bar background
+
+1. Right‑click **HUD** in the Hierarchy → **UI** → **Image**. Rename to **XPBarBg**.
+2. Select **XPBarBg**. In the Inspector:
+   - **Rect Transform**: Anchor **top‑stretch** (same as HUD). **Left** = **10**, **Right** = **10**, **Top** = **0**, **Height** = **12** (or **Top** = 0, **Bottom** = -12).
+   - **Image** component: **Color** = dark grey (e.g. R 0.15, G 0.15, B 0.2). Leave **Source Image** as default or assign any sprite.
+
+### Step 3 – Add the XP bar fill (the bar that fills with XP)
+
+1. Right‑click **XPBarBg** in the Hierarchy → **UI** → **Image**. Rename to **XPBarFill**.
+2. Select **XPBarFill**. In the Inspector:
+   - **Rect Transform**: Anchor **stretch–stretch** (fill parent). **Left**, **Right**, **Top**, **Bottom** all = **0**.
+   - **Image** component:
+     - **Color**: e.g. blue (R 0.3, G 0.6, B 1).
+     - **Source Image**: must have a sprite (default UISprite is fine).
+     - **Image Type**: change from **Simple** to **Filled**.
+     - After **Filled**, set **Fill Method** = **Horizontal**, **Fill Origin** = **Left**, **Fill Amount** = **0** (script will drive this; 0 = empty, 1 = full for next level).
+
+### Step 4 – Add the timer text
+
+1. Right‑click **HUD** in the Hierarchy → **UI** → **Text - TextMeshPro**. (If prompted to import TMP essentials, do so.) Rename to **Timer**.
+2. Select **Timer**. In the Inspector:
+   - **Rect Transform**: Anchor **top center** (top row, middle). **Pos X** = 0, **Pos Y** = **-28**, **Width** = **200**, **Height** = **30**.
+   - **TextMeshPro - Text (UI)** (or **Text Input**): **Text** = **00:00**, **Font Size** = **24**, **Alignment** = horizontal and vertical center. Assign **Font Asset** (e.g. LiberationSans SDF from TextMesh Pro/Resources/Fonts & Materials) if it says “None”.
+
+### Step 5 – Wire up the Game HUD script
+
+1. Select the **Canvas** in the Hierarchy (the same one that has Upgrade UI).
+2. In the Inspector, add **Game HUD** if it’s not there: **Add Component** → search **Game HUD**.
+3. In **Game HUD**:
+   - **Xp Bar Fill**: drag **XPBarFill** from the Hierarchy (the child of XPBarBg) into this field.
+   - **Timer Text**: drag **Timer** from the Hierarchy into this field.
 
 ---
 
