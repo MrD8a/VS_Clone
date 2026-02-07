@@ -6,6 +6,11 @@ public class PlayerExperience : MonoBehaviour
     [SerializeField] private int currentXP = 0;
     [SerializeField] private int xpToNextLevel = 5;
 
+    public int CurrentLevel => currentLevel;
+    public int CurrentXP => currentXP;
+    public int XpToNextLevel => xpToNextLevel;
+    public float NormalizedXP => xpToNextLevel > 0 ? Mathf.Clamp01((float)currentXP / xpToNextLevel) : 0f;
+
     public void AddXP(int amount)
     {
         currentXP += amount;
