@@ -20,21 +20,30 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
-        inputActions.Player.Enable();
+        EnsureInputActions();
+        inputActions?.Player.Enable();
     }
 
     private void OnDisable()
     {
-        inputActions.Player.Disable();
+        inputActions?.Player.Disable();
+    }
+
+    private void EnsureInputActions()
+    {
+        if (inputActions == null)
+            inputActions = new PlayerInputActions();
     }
 
     private void Update()
     {
+        EnsureInputActions();
         movementInput = inputActions.Player.Move.ReadValue<Vector2>().normalized;
     }
 
     private void FixedUpdate()
     {
+        if (rb == null) rb = GetComponent<Rigidbody2D>();
         rb.linearVelocity = movementInput * moveSpeed;
     }
 
