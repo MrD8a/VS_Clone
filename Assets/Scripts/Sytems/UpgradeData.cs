@@ -4,7 +4,8 @@ public enum UpgradeType
 {
     WeaponCooldown,
     WeaponDamage,
-    MoveSpeed
+    MoveSpeed,
+    MagnetRange
 }
 
 [CreateAssetMenu(menuName = "Upgrades/Upgrade")]

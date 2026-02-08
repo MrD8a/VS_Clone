@@ -43,6 +43,7 @@ public class UpgradeUI : MonoBehaviour
     {
         Weapon weapon = FindFirstObjectByType<Weapon>();
         PlayerController player = FindFirstObjectByType<PlayerController>();
+        PlayerMagnet magnet = FindFirstObjectByType<PlayerMagnet>();
 
         switch (upgrade.type)
         {
@@ -54,6 +55,9 @@ public class UpgradeUI : MonoBehaviour
                 break;
             case UpgradeType.MoveSpeed:
                 player.ModifyMoveSpeed(upgrade.value);
+                break;
+            case UpgradeType.MagnetRange:
+                if (magnet != null) magnet.ModifyMagnetRange(upgrade.value);
                 break;
         }
     }
