@@ -1,35 +1,78 @@
 using UnityEngine;
 
+/// <summary>
+/// Spawns enemies based on level time: uses LevelSpawnConfig for phases (spawn rate + which types).
+/// Assign a GameTimer and a LevelSpawnConfig in the editor.
+/// </summary>
 public class EnemySpawner : MonoBehaviour
 {
-    [SerializeField] private GameObject enemyPrefab;
-    [SerializeField] private float spawnInterval = 1.5f;
+    [SerializeField] private GameTimer gameTimer;
+    [SerializeField] private LevelSpawnConfig spawnConfig;
     [SerializeField] private float spawnDistance = 12f;
 
-    private Transform player;
-    private float timer;
+    [Header("Fallback (no config)")]
+    [SerializeField] private GameObject fallbackEnemyPrefab;
+    [SerializeField] private float fallbackSpawnInterval = 1.5f;
+
+    private Transform _player;
+    private int _currentPhaseIndex = -1;
+    private float[] _entryTimers;
+    private float _fallbackTimer;
 
     private void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;
+        _player = GameObject.FindGameObjectWithTag("Player").transform;
+        if (gameTimer == null)
+            gameTimer = FindFirstObjectByType<GameTimer>();
     }
 
     private void Update()
     {
-        timer += Time.deltaTime;
+        float levelTime = gameTimer != null ? gameTimer.ElapsedTime : Time.time;
 
-        if (timer >= spawnInterval)
+        if (spawnConfig != null && spawnConfig.HasPhase(spawnConfig.GetPhaseIndexAt(levelTime)))
         {
-            SpawnEnemy();
-            timer = 0f;
+            int phaseIndex = spawnConfig.GetPhaseIndexAt(levelTime);
+            if (phaseIndex != _currentPhaseIndex)
+            {
+                _currentPhaseIndex = phaseIndex;
+                SpawnPhase phase = spawnConfig.GetPhase(_currentPhaseIndex);
+                _entryTimers = new float[phase.entries.Length];
+            }
+
+            SpawnPhase phaseNow = spawnConfig.GetPhase(_currentPhaseIndex);
+            float dt = Time.deltaTime;
+            for (int i = 0; i < phaseNow.entries.Length; i++)
+            {
+                SpawnEntry e = phaseNow.entries[i];
+                if (e.prefab == null || e.interval <= 0f) continue;
+                _entryTimers[i] += dt;
+                if (_entryTimers[i] >= e.interval)
+                {
+                    SpawnAt(e.prefab);
+                    _entryTimers[i] = 0f;
+                }
+            }
+        }
+        else
+        {
+            if (fallbackEnemyPrefab != null)
+            {
+                _fallbackTimer += Time.deltaTime;
+                if (_fallbackTimer >= fallbackSpawnInterval)
+                {
+                    SpawnAt(fallbackEnemyPrefab);
+                    _fallbackTimer = 0f;
+                }
+            }
         }
     }
 
-    private void SpawnEnemy()
+    private void SpawnAt(GameObject prefab)
     {
+        if (_player == null) return;
         Vector2 spawnDir = Random.insideUnitCircle.normalized;
-        Vector3 spawnPos = player.position + (Vector3)(spawnDir * spawnDistance);
-
-        Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+        Vector3 spawnPos = _player.position + (Vector3)(spawnDir * spawnDistance);
+        Instantiate(prefab, spawnPos, Quaternion.identity);
     }
 }
