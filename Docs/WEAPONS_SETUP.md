@@ -27,7 +27,7 @@ Uses `Weapon` + `WeaponData` with **Projectile Prefab** set. Size scales the pro
    - **Line Duration** → how long the line stays visible (e.g. 0.08).
    - **Size** → line width.
    - **Spawn Offset From Player** → distance from player center so the line starts at the player’s edge (e.g. 0.5).
-   - Cooldown, Damage, Range as usual.
+   - Fire Rate (shots/sec), Damage, Range as usual.
 
 2. **Railgun line prefab**  
    - Empty GameObject + **RailgunLine** script + **BoxCollider2D** (script requires it).
@@ -49,7 +49,7 @@ Uses `Weapon` + `WeaponData` with **Projectile Prefab** set. Size scales the pro
    - **Cone Duration** → how long the cone stays visible (e.g. 0.1).
    - **Size** → cone radius/scale.
    - **Spawn Offset From Player** → distance from player center so the cone base is at the player’s edge (e.g. 0.5).
-   - Cooldown, Damage, Range as usual.
+   - Fire Rate (shots/sec), Damage, Range as usual.
 
 2. **Shotgun cone prefab**  
    - Empty GameObject + **ShotgunCone** script + **PolygonCollider2D** (script requires it).
@@ -67,7 +67,7 @@ The cone always fires **horizontally left or right** from the player (from `Play
 
 ## Weapon Manager – editor setup
 
-**WeaponManager** applies upgrades (cooldown, damage, size) to every equipped weapon. You assign **scene objects** (the GameObjects that have the weapon scripts), not the ScriptableObjects.
+**WeaponManager** manages **3 weapon slots**. At game start only the **starting weapon** is equipped (e.g. Machine Gun). On level-up the player chooses **level up an equipped weapon** or **gain a new weapon**. Assign **scene objects** for each weapon type and **WeaponData** for starting loadout and pool.
 
 ### 1. Add and configure WeaponManager
 
@@ -96,11 +96,53 @@ The cone always fires **horizontally left or right** from the player (from `Play
 
 If you leave **Weapon Manager** empty, UpgradeUI will try to find a WeaponManager in the scene at runtime; assigning it in the editor is more reliable.
 
-## Upgrades
+## Weapon upgrade flow (level-up choices)
 
-`UpgradeUI` uses **WeaponManager** for weapon upgrades. To support new weapon types:
+- On **level up**, **UpgradeUI** shows **3 options**: some are **level up [Weapon] → LvN** (equipped weapon, not at max level), some are **Get [Weapon]** (weapon not equipped, slot available).
+- **Level up** applies the weapon’s **upgrade path** (see Weapon Data **Upgrade Tiers**). No direct stat upgrades; only item levels.
+- **Weapon Data** has **Kind** (MachineGun / Railgun / Shotgun) and **Upgrade Tiers** (per-level multipliers for fire rate, damage, size). E.g. level 2: fire rate 1.2 = 20% more shots/sec; level 3: damage 1.1 = +10% damage.
+- **Passive items** (and their own slots) can be added later; the same pattern applies.
 
-- Add the new weapon reference to **WeaponManager** and handle its upgrade type in `ApplyWeaponUpgrade`.
+---
+
+## How to set up the upgrade path for each weapon
+
+Each weapon’s strength is driven by its **level** (1, 2, 3, …). Level 1 uses the **base stats** on the Weapon Data (Fire Rate, Damage, Range, Size). Higher levels multiply those stats using **Upgrade Tiers**. Fire rate = **shots per second** (higher is better).
+
+### 1. Open the Weapon Data asset
+
+In the **Project** window, select the weapon’s ScriptableObject (e.g. `Assets/ScriptableObjects/Weapons/MachineGun`).
+
+### 2. Set Kind
+
+Under **Weapon type (for slots)** set **Kind** to match the weapon: **MachineGun** (Weapon component), **Railgun** (RailgunWeapon), or **Shotgun** (ShotgunWeapon). This must match the component that has this Weapon Data assigned.
+
+### 3. Add Upgrade Tiers
+
+Under **Upgrade path** you’ll see a list of **Upgrade Tiers**. Each tier defines the multipliers applied **at that level**:
+
+- **Level** – the level this tier applies to (typically 2, 3, 4, …).
+- **Fire Rate Multiplier** – multiply base fire rate by this (e.g. **1.2** = 20% more shots per second).
+- **Damage Multiplier** – multiply base damage (e.g. **1.1** = +10% damage).
+- **Size Multiplier** – multiply base size (projectile/line/cone scale).
+
+All multipliers are applied in order from level 2 up to the weapon’s current level. So at level 3, both the level‑2 and level‑3 tier multipliers are applied.
+
+**Examples:** Level 2: 20% faster fire → Fire Rate Mult 1.2, others 1. Level 3: +10% damage → Damage Mult 1.1, others 1. Level 4: bigger projectiles → Size Mult 1.2.
+
+- **Max level** = 1 + (number of tiers). So 2 tiers = max level 3.
+- Use **1** for “no change” on a stat.
+- Tiers should have **Level** values in order (2, 3, 4, …).
+
+### 4. Add or remove tiers
+
+In **Upgrade Tiers** click **+** to add a tier (set Level and the three multipliers). Use the **−** on a list element to remove it.
+
+### 5. Quick reference
+
+- **Faster fire:** Fire Rate Multiplier &gt; 1 (e.g. 1.2).
+- **More damage:** Damage Multiplier &gt; 1 (e.g. 1.1).
+- **Larger AOE:** Size Multiplier &gt; 1.
 
 ---
 

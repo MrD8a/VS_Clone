@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c704dfc0abde4b45b4eaf704a74dea0, type: 3}
+  m_Name: Railgun
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  kind: 1
+  upgradeTiers:
+  - level: 2
+    fireRateMultiplier: 1.3
+    damageMultiplier: 1
+    sizeMultiplier: 1
+  - level: 3
+    fireRateMultiplier: 1
+    damageMultiplier: 1
+    sizeMultiplier: 1.3
+  - level: 4
+    fireRateMultiplier: 1
+    damageMultiplier: 1.4
+    sizeMultiplier: 1
+  - level: 5
+    fireRateMultiplier: 1.3
+    damageMultiplier: 1
+    sizeMultiplier: 1
+  - level: 6
+    fireRateMultiplier: 1
+    damageMultiplier: 1
+    sizeMultiplier: 1.3
+  - level: 7
+    fireRateMultiplier: 1
+    damageMultiplier: 1.3
+    sizeMultiplier: 1
+  - level: 8
+    fireRateMultiplier: 1.3
+    damageMultiplier: 1
+    sizeMultiplier: 1
+  - level: 9
+    fireRateMultiplier: 1
+    damageMultiplier: 1
+    sizeMultiplier: 2
+  projectilePrefab: {fileID: 0}
+  linePrefab: {fileID: 4179639806629692606, guid: 6a1f8e6168ade7a4f932a4ad722263d1, type: 3}
+  lineLength: 15
+  lineDuration: 0.2
+  conePrefab: {fileID: 0}
+  coneAngle: 25
+  coneDuration: 0.1
+  spawnOffsetFromPlayer: 0
+  fireRate: 0.3
+  damage: 6
+  range: 15
+  size: 6
+  displayName: Railgun
+  description: Line 'em up, mow 'em down.

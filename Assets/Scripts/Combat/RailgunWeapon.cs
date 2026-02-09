@@ -9,7 +9,7 @@ public class RailgunWeapon : MonoBehaviour
     [SerializeField] private WeaponData data;
 
     private float _timer;
-    private float _cooldown;
+    private float _fireRate;
     private float _range;
     private float _currentDamage;
     private float _size;
@@ -17,7 +17,7 @@ public class RailgunWeapon : MonoBehaviour
     private void Awake()
     {
         if (data == null) return;
-        _cooldown = data.Cooldown;
+        _fireRate = data.FireRate;
         _range = data.Range;
         _currentDamage = data.Damage;
         _size = data.Size;
@@ -28,7 +28,8 @@ public class RailgunWeapon : MonoBehaviour
         if (data?.LinePrefab == null) return;
 
         _timer += Time.deltaTime;
-        if (_timer >= _cooldown)
+        float interval = _fireRate > 0f ? 1f / _fireRate : 1f;
+        if (_timer >= interval)
         {
             Fire();
             _timer = 0f;
@@ -73,9 +74,9 @@ public class RailgunWeapon : MonoBehaviour
         return closest;
     }
 
-    public void ModifyCooldown(float amount)
+    public void ModifyFireRate(float amount)
     {
-        _cooldown = Mathf.Max(0.1f, _cooldown - amount);
+        _fireRate = Mathf.Max(0.1f, _fireRate + amount);
     }
 
     public void ModifyDamage(float amount)
@@ -86,5 +87,17 @@ public class RailgunWeapon : MonoBehaviour
     public void ModifySize(float amount)
     {
         _size = Mathf.Max(0.1f, _size + amount);
+    }
+
+    /// <summary>
+    /// Apply stats from assigned WeaponData at the given level (for item upgrade path).
+    /// </summary>
+    public void SetLevel(int level)
+    {
+        if (data == null) return;
+        _fireRate = data.GetFireRateAtLevel(level);
+        _range = data.Range;
+        _currentDamage = data.GetDamageAtLevel(level);
+        _size = data.GetSizeAtLevel(level);
     }
 }

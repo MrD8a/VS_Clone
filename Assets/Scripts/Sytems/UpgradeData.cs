@@ -2,7 +2,7 @@ using UnityEngine;
 
 public enum UpgradeType
 {
-    WeaponCooldown,
+    WeaponFireRate,
     WeaponDamage,
     WeaponSize,
     MoveSpeed,

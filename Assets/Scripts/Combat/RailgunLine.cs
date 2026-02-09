@@ -28,9 +28,9 @@ public class RailgunLine : MonoBehaviour
 
         var box = GetComponent<BoxCollider2D>();
         box.isTrigger = true;
-        float boxLength = length + spawnOffsetFromPlayer;
-        box.size = new Vector2(boxLength / length, 1f);
-        box.offset = new Vector2(-spawnOffsetFromPlayer / (2f * length), 0f);
+        // Hitbox exactly matches visible line: local (1,1) under scale (length, width) = world size length x width, centered.
+        box.size = Vector2.one;
+        box.offset = Vector2.zero;
 
         Invoke(nameof(EndLine), duration);
     }

@@ -14,11 +14,11 @@ public class Weapon : MonoBehaviour
 
     [Header("Legacy (used only when data is null)")]
     [SerializeField] private Projectile projectilePrefab;
-    [SerializeField] private float cooldown = 1f;
+    [SerializeField] private float fireRate = 1f;
     [SerializeField] private float range = 10f;
 
     private float _timer;
-    private float _cooldown;
+    private float _fireRate;
     private float _range;
     private float _currentDamage;
     private float _size;
@@ -27,14 +27,14 @@ public class Weapon : MonoBehaviour
     {
         if (data != null)
         {
-            _cooldown = data.Cooldown;
+            _fireRate = data.FireRate;
             _range = data.Range;
             _currentDamage = data.Damage;
             _size = data.Size;
         }
         else
         {
-            _cooldown = cooldown;
+            _fireRate = fireRate;
             _range = range;
             _currentDamage = projectilePrefab != null ? projectilePrefab.Damage : 1f;
             _size = 1f;
@@ -57,7 +57,8 @@ public class Weapon : MonoBehaviour
         if (projectilePool == null) return;
 
         _timer += Time.deltaTime;
-        if (_timer >= _cooldown)
+        float interval = _fireRate > 0f ? 1f / _fireRate : 1f;
+        if (_timer >= interval)
         {
             Fire();
             _timer = 0f;
@@ -69,12 +70,24 @@ public class Weapon : MonoBehaviour
         EnemyHealth target = FindNearestEnemy();
         if (target == null) return;
 
-        Vector2 direction = (target.transform.position - transform.position).normalized;
+        Vector2 spawnPosition = GetSpawnPosition();
+        Vector2 direction = (target.transform.position - (Vector3)spawnPosition).normalized;
 
         Projectile proj = projectilePool.Get();
-        proj.transform.position = transform.position;
+        proj.transform.position = spawnPosition;
         proj.pool = projectilePool;
         proj.Initialize(direction, _currentDamage, _size);
+    }
+
+    /// <summary>
+    /// Spawn at player center so projectiles don't inherit the weapon child's position offset.
+    /// </summary>
+    private Vector2 GetSpawnPosition()
+    {
+        var player = GetComponentInParent<PlayerController>();
+        if (player != null)
+            return player.transform.position;
+        return transform.position;
     }
 
     private EnemyHealth FindNearestEnemy()
@@ -83,9 +96,10 @@ public class Weapon : MonoBehaviour
         EnemyHealth closest = null;
         float minDist = _range;
 
+        Vector2 origin = GetSpawnPosition();
         foreach (var enemy in enemies)
         {
-            float dist = Vector2.Distance(transform.position, enemy.transform.position);
+            float dist = Vector2.Distance(origin, enemy.transform.position);
             if (dist < minDist)
             {
                 minDist = dist;
@@ -96,9 +110,9 @@ public class Weapon : MonoBehaviour
         return closest;
     }
 
-    public void ModifyCooldown(float amount)
+    public void ModifyFireRate(float amount)
     {
-        _cooldown = Mathf.Max(0.1f, _cooldown - amount);
+        _fireRate = Mathf.Max(0.1f, _fireRate + amount);
     }
 
     public void ModifyDamage(float amount)
@@ -109,5 +123,17 @@ public class Weapon : MonoBehaviour
     public void ModifySize(float amount)
     {
         _size = Mathf.Max(0.1f, _size + amount);
+    }
+
+    /// <summary>
+    /// Apply stats from assigned WeaponData at the given level (for item upgrade path).
+    /// </summary>
+    public void SetLevel(int level)
+    {
+        if (data == null) return;
+        _fireRate = data.GetFireRateAtLevel(level);
+        _range = data.Range;
+        _currentDamage = data.GetDamageAtLevel(level);
+        _size = data.GetSizeAtLevel(level);
     }
 }
