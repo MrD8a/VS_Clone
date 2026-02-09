@@ -5,16 +5,17 @@ using System.Collections.Generic;
 /// Railgun instant-hit line visual and damage handler.
 /// Spawned by <see cref="RailgunWeapon.Fire"/>; lives for a short duration, then self-destructs.
 ///
-/// Uses a trigger <see cref="BoxCollider2D"/> for hit detection. The collider is set to
-/// local size (1,1) and the transform scale is set to (length, width) so the hitbox
-/// exactly matches the visible sprite.
+/// Uses a trigger <see cref="BoxCollider2D"/> for hit detection. The collider is sized to
+/// match the sprite's local bounds, and the transform scale is computed relative to those
+/// bounds so that **both** the sprite and collider end up at exactly (length x width) in
+/// world space, regardless of the sprite's native pixel dimensions / PPU.
 ///
 /// Each enemy is damaged only once per shot (tracked by <see cref="_hit"/>).
 /// Both <see cref="OnTriggerEnter2D"/> and <see cref="OnTriggerStay2D"/> are used
 /// so enemies already overlapping when the line spawns still take damage.
 ///
 /// Prefab requirements:
-///   - BoxCollider2D (trigger) — size is set by code.
+///   - BoxCollider2D (trigger) — size is overridden by code.
 ///   - SpriteRenderer — sprite length along local X, width along local Y.
 ///   - RailgunLine component (this script).
 /// </summary>
@@ -61,13 +62,27 @@ public class RailgunLine : MonoBehaviour
         _duration = duration;
         _hit.Clear();
 
-        // Scale the transform so the sprite fills (length x width) world units.
-        transform.localScale = new Vector3(length, width, 1f);
+        // ── Compute scale relative to the sprite's actual local dimensions ──
+        // The sprite's local size (before any scaling) is determined by its pixel
+        // dimensions and Pixels Per Unit. We must scale relative to those dimensions
+        // so both the visual and the collider end up at exactly (length x width)
+        // in world space.
+        Vector2 spriteLocalSize = Vector2.one; // safe fallback
+        var sr = GetComponent<SpriteRenderer>();
+        if (sr != null && sr.sprite != null)
+            spriteLocalSize = sr.sprite.bounds.size;
 
-        // Set collider to local (1,1) — under the scale above this becomes (length, width) in world space.
+        transform.localScale = new Vector3(
+            length / spriteLocalSize.x,
+            width  / spriteLocalSize.y,
+            1f);
+
+        // Size the collider to the sprite's local bounds so that under the scale
+        // computed above, the world-space collider = (length x width) — exactly
+        // matching the visible sprite.
         var box = GetComponent<BoxCollider2D>();
         box.isTrigger = true;
-        box.size = Vector2.one;
+        box.size   = spriteLocalSize;
         box.offset = Vector2.zero;
 
         // Schedule self-destruction after the visual duration expires.
