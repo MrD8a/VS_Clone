@@ -3,18 +3,18 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     [SerializeField] private float speed = 10f;
-    [SerializeField] private int damage = 1;
+    [SerializeField] private float damage = 1f;
     [SerializeField] private float lifetime = 3f;
 
     private Vector2 direction;
 
     [HideInInspector] public ProjectilePool pool;
 
-    public int Damage => damage;
+    public float Damage => damage;
 
     private float lifetimeRemaining;
 
-    public void SetDamage(int newDamage)
+    public void SetDamage(float newDamage)
     {
         damage = newDamage;
     }
@@ -22,11 +22,13 @@ public class Projectile : MonoBehaviour
     /// <summary>
     /// Initialize the projectile for a shot. Use this when spawning from pool so lifetime returns to pool instead of destroying.
     /// </summary>
-    public void Initialize(Vector2 dir, int damageAmount)
+    /// <param name="sizeScale">Scale multiplier for the projectile (1 = default size).</param>
+    public void Initialize(Vector2 dir, float damageAmount, float sizeScale = 1f)
     {
         direction = dir.normalized;
         damage = damageAmount;
         lifetimeRemaining = lifetime;
+        transform.localScale = Vector3.one * Mathf.Max(0.1f, sizeScale);
     }
 
     private void Update()

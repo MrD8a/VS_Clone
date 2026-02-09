@@ -7,10 +7,31 @@ public class ProjectilePool : MonoBehaviour
     [SerializeField] private int initialSize = 20;
 
     private Queue<Projectile> pool = new();
+    private bool _initialized;
 
     private void Awake()
     {
-        // Pre-instantiate projectiles
+        if (prefab != null)
+            FillPool();
+    }
+
+    /// <summary>
+    /// Initialize pool at runtime (e.g. when Weapon creates pool from WeaponData).
+    /// No-op if already initialized.
+    /// </summary>
+    public void Init(Projectile projectilePrefab, int size = 20)
+    {
+        if (_initialized || projectilePrefab == null) return;
+        prefab = projectilePrefab;
+        initialSize = size;
+        _initialized = true;
+        FillPool();
+    }
+
+    private void FillPool()
+    {
+        if (prefab == null) return;
+        _initialized = true;
         for (int i = 0; i < initialSize; i++)
         {
             Projectile obj = Instantiate(prefab);

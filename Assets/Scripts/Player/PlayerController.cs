@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody2D rb;
     private Vector2 movementInput;
+    private Vector2 _lastFacing = Vector2.right;
 
     private PlayerInputActions inputActions;
 
@@ -39,7 +40,14 @@ public class PlayerController : MonoBehaviour
     {
         EnsureInputActions();
         movementInput = inputActions.Player.Move.ReadValue<Vector2>().normalized;
+        if (movementInput.sqrMagnitude > 0.01f)
+            _lastFacing = movementInput.normalized;
     }
+
+    /// <summary>
+    /// Last non-zero movement direction (default right). Use for weapons that fire in facing direction (e.g. shotgun).
+    /// </summary>
+    public Vector2 FacingDirection => _lastFacing;
 
     private void FixedUpdate()
     {

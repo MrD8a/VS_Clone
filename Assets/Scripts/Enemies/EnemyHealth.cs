@@ -4,18 +4,18 @@ public class EnemyHealth : MonoBehaviour
 {
     [SerializeField] private int maxHealth = 3;
     [SerializeField] private GameObject xpOrbPrefab;
-    private int currentHealth;
+    private float currentHealth;
 
     private void Awake()
     {
         currentHealth = maxHealth;
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(float damage)
     {
         currentHealth -= damage;
 
-        if (currentHealth <= 0)
+        if (currentHealth <= 0f)
         {
             Instantiate(xpOrbPrefab, transform.position, Quaternion.identity);
             Destroy(gameObject);
