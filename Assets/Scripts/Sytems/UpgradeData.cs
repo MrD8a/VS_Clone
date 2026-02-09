@@ -4,6 +4,7 @@ public enum UpgradeType
 {
     WeaponCooldown,
     WeaponDamage,
+    WeaponSize,
     MoveSpeed,
     MagnetRange
 }

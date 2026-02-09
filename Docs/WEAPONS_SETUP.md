@@ -65,12 +65,42 @@ The cone always fires **horizontally left or right** from the player (from `Play
 
 ---
 
+## Weapon Manager – editor setup
+
+**WeaponManager** applies upgrades (cooldown, damage, size) to every equipped weapon. You assign **scene objects** (the GameObjects that have the weapon scripts), not the ScriptableObjects.
+
+### 1. Add and configure WeaponManager
+
+1. In the **Hierarchy**, pick the object that should own the manager (e.g. **Player** or a **GameManager**).
+2. **Add Component** → **Weapon Manager** (script `WeaponManager`).
+3. In the Inspector you’ll see:
+   - **Assault Rifle** (object reference)
+   - **Railgun** (object reference)
+   - **Shotgun** (object reference)
+
+4. For each slot, assign the **GameObject that has that weapon component**:
+   - **Assault Rifle** → drag the GameObject that has the **Weapon** component (e.g. a child of Player named “AssaultRifle” or “Weapon”). Do **not** assign the WeaponData asset.
+   - **Railgun** → drag the GameObject that has the **RailgunWeapon** component.
+   - **Shotgun** → drag the GameObject that has the **ShotgunWeapon** component.
+
+   Leave a slot **empty** if that weapon is not in the scene. The manager only applies upgrades to non‑null references.
+
+**Summary:** WeaponManager expects **scene GameObjects with weapon components**, not WeaponData assets. The WeaponData assets stay assigned on each weapon component (Weapon, RailgunWeapon, ShotgunWeapon) as before.
+
+### 2. Connect Upgrade UI to WeaponManager
+
+1. Select the **GameObject that has the UpgradeUI script** (e.g. your Canvas or a child of it).
+2. In the Inspector, find the **Upgrade UI** component.
+3. Find the **Weapon Manager** field.
+4. Drag the **GameObject that has the WeaponManager script** into this field (e.g. your Player or GameManager). Unity will store the **WeaponManager component** reference.
+
+If you leave **Weapon Manager** empty, UpgradeUI will try to find a WeaponManager in the scene at runtime; assigning it in the editor is more reliable.
+
 ## Upgrades
 
-`UpgradeUI` currently only applies to `Weapon` (assault rifle). To support railgun/shotgun:
+`UpgradeUI` uses **WeaponManager** for weapon upgrades. To support new weapon types:
 
-- Add cases for `RailgunWeapon` and `ShotgunWeapon` in `ApplyUpgrade` (e.g. find them and call `ModifyDamage` / `ModifyCooldown` / `ModifySize`), or
-- Introduce a shared interface (e.g. `IWeapon` with `ModifyDamage`, `ModifyCooldown`, `ModifySize`) and resolve which weapon to upgrade by type or slot.
+- Add the new weapon reference to **WeaponManager** and handle its upgrade type in `ApplyWeaponUpgrade`.
 
 ---
 

@@ -39,22 +39,25 @@ public class UpgradeUI : MonoBehaviour
         panel.SetActive(false);
     }
 
+    [SerializeField] private WeaponManager weaponManager;
+
     private void ApplyUpgrade(UpgradeData upgrade)
     {
-        Weapon weapon = FindFirstObjectByType<Weapon>();
+        if (weaponManager == null)
+            weaponManager = FindFirstObjectByType<WeaponManager>();
+
         PlayerController player = FindFirstObjectByType<PlayerController>();
         PlayerMagnet magnet = FindFirstObjectByType<PlayerMagnet>();
 
         switch (upgrade.type)
         {
             case UpgradeType.WeaponCooldown:
-                weapon.ModifyCooldown(upgrade.value);
-                break;
             case UpgradeType.WeaponDamage:
-                weapon.ModifyDamage(upgrade.value);
+            case UpgradeType.WeaponSize:
+                if (weaponManager != null) weaponManager.ApplyWeaponUpgrade(upgrade.type, upgrade.value);
                 break;
             case UpgradeType.MoveSpeed:
-                player.ModifyMoveSpeed(upgrade.value);
+                if (player != null) player.ModifyMoveSpeed(upgrade.value);
                 break;
             case UpgradeType.MagnetRange:
                 if (magnet != null) magnet.ModifyMagnetRange(upgrade.value);
