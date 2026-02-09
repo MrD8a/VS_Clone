@@ -1,26 +1,31 @@
 using UnityEngine;
 
 /// <summary>
-/// Railgun weapon component. Fires an instant, piercing line toward the nearest enemy.
-/// All enemies overlapping the line take damage once per shot.
+/// Machine gun weapon component. Fires projectiles at the nearest enemy within range.
+/// Projectiles are drawn from a <see cref="ProjectilePool"/> for performance; the pool is
+/// created automatically at Start if one isn't already assigned.
 ///
-/// Requires a <see cref="WeaponData"/> with <c>LinePrefab</c> assigned. The line prefab
-/// must have a <see cref="RailgunLine"/> component and a <c>BoxCollider2D</c> set to trigger.
+/// Stats (fire rate, damage, range, size) are read from the assigned <see cref="WeaponData"/>
+/// ScriptableObject. The <see cref="SetLevel"/> method re-applies stats for the weapon's
+/// current upgrade tier so the upgrade path drives all stat changes.
 ///
-/// Stats (fire rate, damage, range, size) are read from the assigned WeaponData.
-/// The Size stat controls the line's visual width. The <see cref="SetLevel"/> method
-/// re-applies stats for the weapon's current upgrade tier.
-///
-/// Uses the player center as the distance origin for target acquisition (via
-/// <see cref="GetPlayerPosition"/>), consistent with other weapon scripts.
+/// Spawns projectiles at the player center (via <see cref="GetPlayerPosition"/>)
+/// so the weapon child object's local offset doesn't affect firing origin.
 /// </summary>
-public class RailgunWeapon : MonoBehaviour
+public class MachineGunWeapon : MonoBehaviour
 {
     // ── Inspector fields ──────────────────────────────────────────────
 
     [Header("Weapon Data")]
-    [Tooltip("ScriptableObject that holds base stats and the line prefab.")]
+    [Tooltip("ScriptableObject that holds base stats and the projectile prefab.")]
     [SerializeField] private WeaponData data;
+
+    [Header("Projectile Pool")]
+    [Tooltip("Optional pre-existing pool. If null, one is created at Start from WeaponData.")]
+    [SerializeField] private ProjectilePool projectilePool;
+
+    [Tooltip("Number of projectiles to pre-instantiate when creating the pool.")]
+    [SerializeField] private int poolInitialSize = 20;
 
     // ── Runtime state ─────────────────────────────────────────────────
 
@@ -33,10 +38,10 @@ public class RailgunWeapon : MonoBehaviour
     /// <summary>Max distance to acquire a target (world units).</summary>
     private float _range;
 
-    /// <summary>Damage dealt to each enemy hit by the line.</summary>
+    /// <summary>Damage dealt per projectile.</summary>
     private float _currentDamage;
 
-    /// <summary>Line width (passed to RailgunLine as the width/size stat).</summary>
+    /// <summary>Scale multiplier applied to each projectile's transform.</summary>
     private float _size;
 
     /// <summary>Cached reference to the player (for spawn position).</summary>
@@ -54,12 +59,36 @@ public class RailgunWeapon : MonoBehaviour
         if (player != null)
             _playerTransform = player.transform;
 
-        if (data == null) return;
+        // Read base stats from assigned data; fall back to safe defaults.
+        if (data != null)
+        {
+            _fireRate = data.FireRate;
+            _range = data.Range;
+            _currentDamage = data.Damage;
+            _size = data.Size;
+        }
+        else
+        {
+            _fireRate = 1f;
+            _range = 10f;
+            _currentDamage = 1f;
+            _size = 1f;
+        }
+    }
 
-        _fireRate = data.FireRate;
-        _range = data.Range;
-        _currentDamage = data.Damage;
-        _size = data.Size;
+    /// <summary>
+    /// Create a projectile pool if one wasn't assigned in the Inspector.
+    /// </summary>
+    private void Start()
+    {
+        if (data != null && data.ProjectilePrefab != null && projectilePool == null)
+        {
+            // Create a child GameObject to hold the pool component.
+            var poolGo = new GameObject($"{data.name}_Pool");
+            poolGo.transform.SetParent(transform);
+            projectilePool = poolGo.AddComponent<ProjectilePool>();
+            projectilePool.Init(data.ProjectilePrefab, poolInitialSize);
+        }
     }
 
     /// <summary>
@@ -67,8 +96,8 @@ public class RailgunWeapon : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        // Can't fire without a line prefab.
-        if (data?.LinePrefab == null) return;
+        // Can't fire without a pool.
+        if (projectilePool == null) return;
 
         _timer += Time.deltaTime;
 
@@ -85,36 +114,26 @@ public class RailgunWeapon : MonoBehaviour
     // ── Firing ────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Acquire the nearest enemy and instantiate the railgun line toward it.
-    /// The line is centered between the player and the far end, then rotated to face the target.
+    /// Acquire the nearest enemy and launch a pooled projectile toward it.
     /// </summary>
     private void Fire()
     {
         EnemyHealth target = FindNearestEnemy();
         if (target == null) return;
 
-        // Compute aim direction from the player center toward the target.
+        // Spawn at the player center, aim toward the target.
         Vector2 origin = GetPlayerPosition();
         Vector2 direction = ((Vector2)target.transform.position - origin).normalized;
 
-        // Position the line so its center sits at (player + offset + halfLength) along the aim direction.
-        float offset = data.SpawnOffsetFromPlayer;
-        Vector2 lineCenter = origin + direction * (offset + data.LineLength * 0.5f);
-
-        // Instantiate the line prefab, then rotate it to face the target.
-        GameObject lineGo = Instantiate(data.LinePrefab, lineCenter, Quaternion.identity);
-        float angle = Vector2.SignedAngle(Vector2.right, direction);
-        lineGo.transform.rotation = Quaternion.Euler(0f, 0f, angle);
-
-        // Configure the RailgunLine component (damage, width, length, duration).
-        if (lineGo.TryGetComponent(out RailgunLine line))
-            line.Setup(_currentDamage, _size, data.LineLength, data.LineDuration, data.SpawnOffsetFromPlayer);
-        else
-            Destroy(lineGo);
+        Projectile proj = projectilePool.Get();
+        proj.transform.position = origin;
+        proj.pool = projectilePool;
+        proj.Initialize(direction, _currentDamage, _size);
     }
 
     /// <summary>
-    /// Returns the player's world position for consistent distance calculations.
+    /// Returns the player's world position so projectiles originate from the player center,
+    /// not from this weapon child object's (potentially offset) position.
     /// Falls back to this transform if no player is found.
     /// </summary>
     private Vector2 GetPlayerPosition()
@@ -164,7 +183,7 @@ public class RailgunWeapon : MonoBehaviour
         _currentDamage += amount;
     }
 
-    /// <summary>Increase line width by a flat amount (clamped to 0.1 minimum).</summary>
+    /// <summary>Increase projectile size by a flat amount (clamped to 0.1 minimum).</summary>
     public void ModifySize(float amount)
     {
         _size = Mathf.Max(0.1f, _size + amount);
@@ -175,6 +194,7 @@ public class RailgunWeapon : MonoBehaviour
     /// <summary>
     /// Re-apply stats from the assigned <see cref="WeaponData"/> at the given level.
     /// Called by <see cref="WeaponManager"/> when the weapon is equipped or levelled up.
+    /// Each level applies the cumulative tier multipliers defined in the data asset.
     /// </summary>
     public void SetLevel(int level)
     {

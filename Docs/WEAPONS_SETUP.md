@@ -4,7 +4,7 @@
 
 All weapons use a **Size** stat from `WeaponData`:
 
-- **Assault rifle**: scales the projectile (localScale).
+- **Machine Gun**: scales the projectile (localScale).
 - **Railgun**: line width.
 - **Shotgun**: cone radius/scale.
 
@@ -12,9 +12,9 @@ You can add a future upgrade type (e.g. `WeaponSize`) and call `Weapon.ModifySiz
 
 ---
 
-## Assault rifle (existing)
+## Machine Gun (existing)
 
-Uses `Weapon` + `WeaponData` with **Projectile Prefab** set. Size scales the projectile when fired.
+Uses `MachineGunWeapon` + `WeaponData` with **Projectile Prefab** set. Size scales the projectile when fired.
 
 ---
 
@@ -74,18 +74,18 @@ The cone always fires **horizontally left or right** from the player (from `Play
 1. In the **Hierarchy**, pick the object that should own the manager (e.g. **Player** or a **GameManager**).
 2. **Add Component** → **Weapon Manager** (script `WeaponManager`).
 3. In the Inspector you’ll see:
-   - **Assault Rifle** (object reference)
+   - **Machine Gun** (object reference)
    - **Railgun** (object reference)
    - **Shotgun** (object reference)
 
 4. For each slot, assign the **GameObject that has that weapon component**:
-   - **Assault Rifle** → drag the GameObject that has the **Weapon** component (e.g. a child of Player named “AssaultRifle” or “Weapon”). Do **not** assign the WeaponData asset.
+   - **Machine Gun** → drag the GameObject that has the **MachineGunWeapon** component. Do **not** assign the WeaponData asset.
    - **Railgun** → drag the GameObject that has the **RailgunWeapon** component.
    - **Shotgun** → drag the GameObject that has the **ShotgunWeapon** component.
 
    Leave a slot **empty** if that weapon is not in the scene. The manager only applies upgrades to non‑null references.
 
-**Summary:** WeaponManager expects **scene GameObjects with weapon components**, not WeaponData assets. The WeaponData assets stay assigned on each weapon component (Weapon, RailgunWeapon, ShotgunWeapon) as before.
+**Summary:** WeaponManager expects **scene GameObjects with weapon components**, not WeaponData assets. The WeaponData assets stay assigned on each weapon component (MachineGunWeapon, RailgunWeapon, ShotgunWeapon) as before.
 
 ### 2. Connect Upgrade UI to WeaponManager
 
@@ -115,7 +115,7 @@ In the **Project** window, select the weapon’s ScriptableObject (e.g. `Assets/
 
 ### 2. Set Kind
 
-Under **Weapon type (for slots)** set **Kind** to match the weapon: **MachineGun** (Weapon component), **Railgun** (RailgunWeapon), or **Shotgun** (ShotgunWeapon). This must match the component that has this Weapon Data assigned.
+Under **Weapon type (for slots)** set **Kind** to match the weapon: **MachineGun** (MachineGunWeapon component), **Railgun** (RailgunWeapon), or **Shotgun** (ShotgunWeapon). This must match the component that has this Weapon Data assigned.
 
 ### 3. Add Upgrade Tiers
 

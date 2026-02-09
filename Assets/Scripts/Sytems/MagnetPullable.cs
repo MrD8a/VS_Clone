@@ -1,13 +1,22 @@
 using UnityEngine;
 
 /// <summary>
-/// Attach to any pickup (XP orbs, future items) that should be pulled toward the player when in magnet range.
-/// The magnet system finds all objects with this component within range and moves them toward the player.
+/// Marks a pickup (XP orb, future items) as pullable by the <see cref="PlayerMagnet"/>.
+/// The magnet system finds all active objects with this component and moves those within
+/// range toward the player.
+///
+/// <see cref="PullSpeedMultiplier"/> allows individual pickups to be pulled faster or
+/// slower than the default speed (e.g. heavier items move slower).
 /// </summary>
 public class MagnetPullable : MonoBehaviour
 {
-    [Tooltip("Multiplier for pull speed (1 = default). Use for heavier/slower pickups later.")]
+    // ── Inspector fields ──────────────────────────────────────────────
+
+    [Tooltip("Multiplier for pull speed (1 = default). Use < 1 for heavier pickups.")]
     [SerializeField] private float pullSpeedMultiplier = 1f;
 
+    // ── Public accessors ──────────────────────────────────────────────
+
+    /// <summary>Speed multiplier applied when the magnet pulls this pickup.</summary>
     public float PullSpeedMultiplier => pullSpeedMultiplier;
 }
